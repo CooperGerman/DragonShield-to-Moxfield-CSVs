@@ -30,6 +30,7 @@ def run(args):
             res = ['Count,Name,Edition,Condition,Language,Foil']
 
             cond_lut = {
+                        'Mint'         : "M",
                         'NearMint'     : "NM",
                         'Excellent'    : "NM",
                         'Good'         : 'LP',
