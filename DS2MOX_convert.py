@@ -46,7 +46,7 @@ def run(args):
                 spamreader = csv.reader(csvfile, delimiter=',')
                 for row in spamreader:
                     # wrap card name in double quotes b/c some names have commmas included, this breaks import in Moxfield
-                    res.append(row[1]+',"'+row[3]+'",'+row[5]+',' + cond_lut[row[7]]+','+row[9]+','+(row[8] if row[8] == 'Foil' else '').lower()+',')
+                    res.append(row[1]+',"'+ row[3].replace('"','""') +'",'+row[5]+',' + cond_lut[row[7]]+','+row[9]+','+(row[8] if row[8] == 'Foil,' else '').lower()+',')
             f = open(moxoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_mox.csv', 'w')
 
         elif 'Card Type' in lines[1]: # Deck Export case
