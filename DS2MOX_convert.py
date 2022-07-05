@@ -7,14 +7,18 @@ import os
 
 
 def run(args):
-    os.makedirs('./mox', exist_ok=True)
+    
+    #Create mox folder at the path given, make files easier to find
+    moxoutputfolder =args.path + '/mox'
+    os.makedirs(moxoutputfolder, exist_ok=True)
 
     fils = glob.glob(args.path+'/*.csv', recursive=True)
     if not fils:
         print('No files found in ./'+args.path+'/*')
     for fil in fils:
         print('Converting '+fil)
-        f = open(fil, encoding='utf-16-le')
+        #utf-8 appears to allow decknames/filenames with special characters to process and not error
+        f = open(fil, encoding='utf-8')
         lines = f.readlines()
         f.close()
         if 'Folder Name' in lines[1]: # Folder Export case
@@ -26,6 +30,7 @@ def run(args):
             res = ['Count,Name,Edition,Condition,Language,Foil']
 
             cond_lut = {
+                        'Mint'         : "M",
                         'NearMint'     : "NM",
                         'Excellent'    : "NM",
                         'Good'         : 'LP',
@@ -40,8 +45,9 @@ def run(args):
             with open('./tmp.csv', newline='') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 for row in spamreader:
-                    res.append(row[1]+','+row[3]+','+row[5]+',' + cond_lut[row[7]]+','+row[9]+','+(row[8] if row[8] == 'Foil' else '').lower()+',')
-            f = open('./mox/'+(os.path.splitext(os.path.basename(fil))[0])+'_mox.csv', 'w')
+                    # wrap card name in double quotes b/c some names have commmas included, this breaks import in Moxfield
+                    res.append(row[1]+',"'+ row[3].replace('"','""') +'",'+row[5]+',' + cond_lut[row[7]]+','+row[9]+','+(row[8] if row[8] == 'Foil,' else '').lower()+',')
+            f = open(moxoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_mox.csv', 'w')
 
         elif 'Card Type' in lines[1]: # Deck Export case
             lines.pop(0)
@@ -60,7 +66,7 @@ def run(args):
                 for row in spamreader:
                     if not 'Token' in row[2]:
                         res.append(row[1]+' '+row[2])
-            f = open('./mox/'+(os.path.splitext(os.path.basename(fil))[0])+'_mox.txt', 'w')
+            f = open(moxoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0]) + '_mox.txt', 'w')
         else :
             raise Exception('Unrecognized csv format (allowed are Folder export and Deck export')
         f.write('\n'.join(res) )
