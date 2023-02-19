@@ -80,7 +80,7 @@ def run(args):
             '''
             If filtering has been requested, filter the files
             '''
-            if args.min_count > 1 or args.min_price > 0.0 or args.max_price != 'inf':
+            if args.min_instances > 1 or args.min_price > 0.0 or args.max_price != 'inf':
                 filt_db = CardDB()
                 na_db = CardDB()
                 # First update prices if requested currency is not USD
@@ -88,7 +88,7 @@ def run(args):
                     db.update_prices()
 
                 for c in db.cards:
-                    if len(db.get_cards_by_name(c.name)) >= args.min_count :
+                    if len(db.get_cards_by_name(c.name)) >= args.min_instances :
                         for fcard in db.get_cards_by_name(c.name):
                             log.debug('Filtering card: '+str(fcard))
                             if fcard.price:
@@ -168,10 +168,10 @@ def main():
         help='Path to input csv files '
     )
     parser.add_argument(
-        '--min_count',
+        '--min_instances',
         type=int,
         default=1,
-        help='Minimum count of cards to be included in output'
+        help='Minimum instances of cards to be included in output'
     )
     parser.add_argument(
         '--min_price',

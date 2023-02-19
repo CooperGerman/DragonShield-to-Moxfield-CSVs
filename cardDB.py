@@ -170,6 +170,7 @@ class Card(object):
         ed_lut = {
             'plgs' : 'plg20',
             'gk2_rakdos' : 'gk2',
+            'veld' : 'eld',
         }
         self.name = name
         self.card_number = card_number
