@@ -11,6 +11,9 @@ from typing import Text
 import colored_traceback.auto
 import colored_traceback.always
 
+global TIME
+TIME = datetime.datetime.now()
+
 def run(args):
 
     #Create mox folder at the path given, make files easier to find

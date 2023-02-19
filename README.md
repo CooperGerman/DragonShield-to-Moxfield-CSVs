@@ -1,9 +1,8 @@
 # What am I ?
 
-This repo contains a simple script that aims at reformatting DragonSHield exported CSV files into Moxfield acceptable ones.
-
-It also contains a more advanced script that can filter the cards based on a list of cards you want to sell.
-This script uses minimum and maximum prices as well as the minimum number of instances for each card to determine if it should be included in the output.
+This repo contains some simple scripts :
+- `convert.py` aims at reformatting DragonSHield exported CSV files into Moxfield acceptable ones.
+- `advanced_filtering.py` is a more advanced script that can filter the cards based on a list of cards you want to sell. This script uses minimum and maximum prices as well as the minimum number of instances for each card to determine if it should be included in the output.
 
 # How to me ?
 ## convert.py

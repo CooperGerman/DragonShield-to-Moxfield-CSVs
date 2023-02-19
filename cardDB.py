@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+import datetime
 import json
 import logging as log
+import time
 from typing import Text
 import colored_traceback.auto
 import colored_traceback.always
 
+global TIME
+TIME = datetime.datetime.now()
 class CardDB(object):
     '''
     CardDB class to hold card info
@@ -203,7 +207,16 @@ class Card(object):
         # search using this api /cards/:code/:number(/:lang)
         url = 'https://api.scryfall.com/cards/'+self.edition+'/'+self.card_number+'/'+self.language
         log.debug(url)
+        # compare last TIME and now and verify at least 100ms have passed
+        # if not, sleep for 100ms
+        # this is to avoid hitting the rate limit of 10 requests per second
+        # https://scryfall.com/docs/api
+        global TIME
+        if (datetime.datetime.now() - TIME).total_seconds() < 0.1:
+            time.sleep(0.1)
+        TIME = datetime.datetime.now()
         r = requests.get(url)
+
         self.currency = currency
         if r.status_code == 200:
             # check if we got a match
@@ -217,7 +230,15 @@ class Card(object):
             log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil) + ' trying without language')
             url = 'https://api.scryfall.com/cards/'+self.edition+'/'+self.card_number
             log.debug(url)
+            # compare last TIME and now and verify at least 100ms have passed
+            # if not, sleep for 100ms
+            # this is to avoid hitting the rate limit of 10 requests per second
+            # https://scryfall.com/docs/api
+            if (datetime.datetime.now() - TIME).total_seconds() < 0.1:
+                time.sleep(0.1)
+            TIME = datetime.datetime.now()
             r = requests.get(url)
+
             if r.status_code == 200:
                 # check if we got a match
                 if r.json()['object'] == 'error':
