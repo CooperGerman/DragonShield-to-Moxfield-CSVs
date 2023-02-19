@@ -7,9 +7,9 @@ import os
 
 
 def run(args):
-    
+
     #Create mox folder at the path given, make files easier to find
-    moxoutputfolder =args.path + '/mox'
+    moxoutputfolder =args.path + '/../mox'
     os.makedirs(moxoutputfolder, exist_ok=True)
 
     fils = glob.glob(args.path+'/*.csv', recursive=True)
@@ -21,7 +21,10 @@ def run(args):
         f = open(fil, encoding='utf-8')
         lines = f.readlines()
         f.close()
-        if 'Folder Name' in lines[1]: # Folder Export case
+        if 'Folder Name' in lines[1]:
+            '''
+            Folder Export case
+            '''
             lines.pop(0)
             lines.pop(0)
             f = open('./tmp.csv', 'w')
@@ -49,7 +52,10 @@ def run(args):
                     res.append(row[1]+',"'+ row[3].replace('"','""') +'",'+row[5]+',' + cond_lut[row[7]]+','+row[9]+','+(row[8] if row[8] == 'Foil,' else '').lower()+',')
             f = open(moxoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_mox.csv', 'w')
 
-        elif 'Card Type' in lines[1]: # Deck Export case
+        elif 'Card Type' in lines[1]:
+            '''
+            Deck Export case
+            '''
             lines.pop(0)
             lines.pop(0)
             f = open('./tmp.csv', 'w')

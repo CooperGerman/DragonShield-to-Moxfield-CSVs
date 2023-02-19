@@ -1,2 +1,6 @@
 inputs
 mox
+cleaned
+.history
+.vscode
+__pycache__
