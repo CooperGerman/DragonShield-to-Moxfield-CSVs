@@ -17,6 +17,7 @@
 import datetime
 import json
 import logging as log
+import re
 import time
 from typing import Text
 import colored_traceback.auto
@@ -186,14 +187,20 @@ class Card(object):
         For example, the scryfall API uses 'gk2' for 'gk2_rakdos' but the lookup table below uses 'gk2_rakdos'
         This table has been updated with empirically found corner cases
         '''
-        ed_lut = {
-            'plgs' : 'plg20',
-            'gk2_rakdos' : 'gk2',
-            'veld' : 'eld',
+        ed_lut_patt = {
+            'plgs'  : 'plg20',
+            'gk2_*' : 'gk2',
+            'gk1_*' : 'gk1',
+            'veld'  : 'eld',
         }
         self.name = name
         self.card_number = card_number
-        self.edition = ed_lut[edition.lower()] if edition.lower() in ed_lut.keys() else edition.lower()
+        # iterate over lookup table and replace edition if needed by using regex pattern (as key)
+        self.edition = edition.lower()
+        for k, v in ed_lut_patt.items():
+            if re.match(k, edition, re.IGNORECASE):
+                self.edition = v.lower()
+
         self.editionstr = editionstr.lower()
         self.condition = condition
         self.language = lang_lut[language.lower()]
@@ -270,7 +277,7 @@ class Card(object):
             else :
                 log.critical('Error getting price for card: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
                 log.critical('Please check if the card is available on scryfall.com')
-                log.critical('Search for '+self.name+' on : https://scryfall.com/')
+                log.critical('Search for "'+self.name+'" on : https://scryfall.com/')
                 log.critical('-- Language might not be available for this card or edition mistake might have been made')
                 log.critical('-- Set code might be wrong (correct convention are to be deducted from scryfall.com. Search your card and look at the resulting URL. Some codes contain ★ DragonSHield might export XXXetc card codes that do not seem supported.)')
                 log.critical('-- Edition code might be wrong (correct convention are to be deducted from scryfall.com. Search your card and look at the resulting URL. Some codes from dragon shield like PLGS should be plg20.)')

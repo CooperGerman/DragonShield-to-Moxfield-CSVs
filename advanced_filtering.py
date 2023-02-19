@@ -14,6 +14,9 @@
 ╚██████╔╝   ██║   ██║███████╗██║   ██║   ██║███████╗███████║
  ╚═════╝    ╚═╝   ╚═╝╚══════╝╚═╝   ╚═╝   ╚═╝╚══════╝╚══════╝
 '''
+import datetime
+global TIME
+TIME = datetime.datetime.now()
 import argparse
 import csv
 import glob
@@ -25,8 +28,7 @@ from typing import Text
 import colored_traceback.auto
 import colored_traceback.always
 
-global TIME
-TIME = datetime.datetime.now()
+
 
 def run(args):
 
