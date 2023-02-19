@@ -46,8 +46,20 @@ def run(args):
                 spamreader = csv.reader(csvfile, delimiter=',')
                 for row in spamreader:
                     # wrap card name in double quotes b/c some names have commmas included, this breaks import in Moxfield
-                    log.info('Treating card: '+str(row[3]))
-                    tmp_card = Card(name='"'+row[3]+'"', edition=row[4], card_number=row[6], condition=row[7], language=row[9], promo=('s' in row[6] or 'p' in row[6]), etched=(row[8] == 'Etched'), foil=(row[8] == 'Foil'), count=int(row[1]), price=(float(row[14]) if row[14] else None))
+                    log.debug('Treating card: '+str(row[3]))
+                    tmp_card = Card(
+                            name=row[3],
+                            edition=row[4],
+                            editionstr=row[5],
+                            card_number=row[6],
+                            condition=row[7],
+                            language=row[9],
+                            promo=('s' in row[6] or 'p' in row[6]),
+                            etched=(row[8] == 'Etched'),
+                            foil=(row[8] == 'Foil'),
+                            count=int(row[1]),
+                            price=(float(row[14]) if row[14] else None)
+                        )
                     if not row[14] :
                         log.debug('Updating the price of as none has been found: '+str(tmp_card))
                         tmp_card.update_price()
@@ -70,6 +82,7 @@ def run(args):
             '''
             if args.min_count > 1 or args.min_price > 0.0 or args.max_price != 'inf':
                 filt_db = CardDB()
+                na_db = CardDB()
                 # First update prices if requested currency is not USD
                 if args.currency != 'usd':
                     db.update_prices()
@@ -78,8 +91,51 @@ def run(args):
                     if len(db.get_cards_by_name(c.name)) >= args.min_count :
                         for fcard in db.get_cards_by_name(c.name):
                             log.debug('Filtering card: '+str(fcard))
-                            if fcard.price >= args.min_price:
-                                filt_db.add(fcard)
+                            if fcard.price:
+                                if fcard.price >= args.min_price:
+                                    filt_db.add(fcard)
+                            else :
+                                na_db.add(fcard)
+                                log.warning('Card has no price, skipping: '+str(fcard))
+
+                # dump filtered db into json file
+                f = open(cleanoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_filt_db.json', 'w')
+
+                # keep only 2 decimals for total value
+                value = int(filt_db.get_value()*100)/100
+
+                f.write(
+                        json.dumps({
+                            'Header' : {
+                                            'nb cards' : len(na_db.cards),
+                                            'max value' : value,
+                                            '60% resell vallue' : value*0.6,
+                                            'currency' : args.currency.upper(),
+                                        },
+                            'content' : filt_db.__dict__()
+                        }, indent=4))
+                f.close()
+                # print filter summary (nb of filtered cards, max value, 60% resell value)
+                log.critical('Filtered cards: '+str(len(filt_db.cards)))
+                log.critical('  -- Max value: '+str(value)+ ' ('+args.currency.upper()+')')
+                log.critical('  -- 60% resell value: '+str(value*0.6) + ' ('+args.currency.upper()+')')
+
+
+                if na_db.cards:
+                    # dump non applicable db into json file
+                    f = open(cleanoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_na_db.json', 'w')
+                    f.write(
+                        json.dumps({
+                            'Header' : {
+                                            'nb cards' : len(na_db.cards),
+                                        },
+                            'content' : na_db.__dict__()
+                        }, indent=4))
+                    f.close()
+                    # print non applicable summary (nb of non applicable cards)
+                    log.critical('Non applicable cards: '+str(len(na_db.cards)))
+                    log.critical('  -- Estimated number of token entries: '+str(len(na_db.get_entries_by_type('token'))))
+
 
 
 
@@ -135,12 +191,6 @@ def main():
         default='usd',
         choices=['usd', 'eur', 'tix'],
         help='Currency to use for price filtering and/or updating'
-    )
-    parser.add_argument(
-        '--dump_json',
-        type=bool,
-        default=False,
-        help='Dump cleaned and filtered json file for each csv file'
     )
     parser.add_argument(
         '--loglvl',

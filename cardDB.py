@@ -23,6 +23,12 @@ class CardDB(object):
         '''
         self.cards.append(card)
 
+    def get_value(self):
+        '''
+        Get total value of cards in DB
+        '''
+        return sum([c.get_value() for c in self.cards])
+
     def find(self, card):
         '''
         Find card in DB
@@ -38,6 +44,43 @@ class CardDB(object):
         '''
         return [c for c in self.cards if c.name == name]
 
+    def get_entries_by_type(self, type):
+        '''
+        Get all card entries with given type (card are merged if same name)
+        '''
+        res = []
+        treated = []
+        if not type.lower() in ['token', 'land', 'creature', 'artifact', 'enchantment', 'planeswalker', 'instant', 'sorcery']:
+            raise ValueError('Type must be one of: token, land, creature, artifact, enchantment, planeswalker, instant, sorcery')
+        if type.lower() == 'token':
+            for c in self.cards:
+                if (not c.name in treated) and ('token' in c.editionstr.lower()):
+                    res.append(c)
+                    treated.append(c.name)
+
+        else:
+            raise NotImplementedError('Other types not implemented yet')
+
+        return res
+
+
+    def get_cards_by_type(self, type):
+        '''
+        Get all cards with given type
+        '''
+        res = []
+        if not type.lower() in ['token', 'land', 'creature', 'artifact', 'enchantment', 'planeswalker', 'instant', 'sorcery']:
+            raise ValueError('Type must be one of: token, land, creature, artifact, enchantment, planeswalker, instant, sorcery')
+        if type.lower() == 'token':
+            for c in self.cards:
+                if 'token' in c.editionstr.lower():
+                    res.append(c)
+
+        else:
+            raise NotImplementedError('Other types not implemented yet')
+
+        return res
+
     def update_prices(self, currency = 'usd'):
         '''
         iterate over all cards in DB and update price
@@ -51,6 +94,14 @@ class CardDB(object):
 
     def __str__(self):
         return str(self.cards)
+
+    def __dict__(self):
+        '''
+        convert DB to dict with each element being a dict
+        '''
+        return {'cards' : [c.__dict__ for c in self.cards]}
+
+
 
     def dump(self):
         '''
@@ -72,7 +123,7 @@ class Card(object):
         price
         currency
     '''
-    def __init__(self, name, edition, card_number : int, condition, language, promo : bool, etched : bool, foil : bool, count : int, price, currency = 'usd'):
+    def __init__(self, name, edition, editionstr, card_number : int, condition, language, promo : bool, etched : bool, foil : bool, count : int, price, currency = 'usd'):
         '''
         en  | en | English             |
         es  | sp | Spanish             |
@@ -111,9 +162,19 @@ class Card(object):
             'sanskrit' : 'sa',
             'phyrexian' : 'ph',
         }
+        '''
+        #FIXME: This lookup table should be updated with corner case edition names that are not the same as the scryfall API
+        For example, the scryfall API uses 'gk2' for 'gk2_rakdos' but the lookup table below uses 'gk2_rakdos'
+        This table has been updated with empirically found corner cases
+        '''
+        ed_lut = {
+            'plgs' : 'plg20',
+            'gk2_rakdos' : 'gk2',
+        }
         self.name = name
         self.card_number = card_number
-        self.edition = edition.lower()
+        self.edition = ed_lut[edition.lower()] if edition.lower() in ed_lut.keys() else edition.lower()
+        self.editionstr = editionstr.lower()
         self.condition = condition
         self.language = lang_lut[language.lower()]
 
@@ -126,6 +187,11 @@ class Card(object):
         self.alt_prc = False
         # if self.promo:
         #     self.edition = self.edition[1:]
+    def get_value(self):
+        '''
+        Get value of card
+        '''
+        return self.price * self.count
 
     def update_price(self, currency = 'usd'):
         '''
@@ -137,17 +203,17 @@ class Card(object):
         url = 'https://api.scryfall.com/cards/'+self.edition+'/'+self.card_number+'/'+self.language
         log.debug(url)
         r = requests.get(url)
+        self.currency = currency
         if r.status_code == 200:
             # check if we got a match
             if r.json()['object'] == 'error':
                 log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
                 exit(1)
-            price = r.json()['prices'][currency+('_etched' if self.etched else '_foil' if self.foil else '')]
+            price = r.json()['prices'][self.currency+('_etched' if self.etched else '_foil' if self.foil else '')]
             self.price = float(price) if price else None
-            self.currency = currency
         else:
             # search using this api /cards/:code/:number
-            log.info('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil) + ' trying without language')
+            log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil) + ' trying without language')
             url = 'https://api.scryfall.com/cards/'+self.edition+'/'+self.card_number
             log.debug(url)
             r = requests.get(url)
@@ -156,15 +222,21 @@ class Card(object):
                 if r.json()['object'] == 'error':
                     log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
                     exit(1)
-                price = r.json()['prices'][currency+('_etched' if self.etched else '_foil' if self.foil else '')]
+                prices= r.json()['prices']
+                if self.currency+('_etched' if self.etched else '_foil' if self.foil else '') in prices:
+                    price = prices[self.currency+('_etched' if self.etched else '_foil' if self.foil else '')]
+                else:
+                    log.warning('No exact match found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil)+ 'in '+self.currency+('_etched' if self.etched else '_foil' if self.foil else '')+' using '+self.currency+' instead')
+                    price = prices[self.currency]
                 self.price = float(price) if price else None
-                self.currency = currency
                 self.alt_prc = True
             else :
                 log.critical('Error getting price for card: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
                 log.critical('Please check if the card is available on scryfall.com')
                 log.critical('Search for '+self.name+' on : https://scryfall.com/')
                 log.critical('-- Language might not be available for this card or edition mistake might have been made')
+                log.critical('-- Set code might be wrong (correct convention are to be deducted from scryfall.com. Search your card and look at the resulting URL. Some codes contain ★ DragonSHield might export XXXetc card codes that do not seem supported.)')
+                log.critical('-- Edition code might be wrong (correct convention are to be deducted from scryfall.com. Search your card and look at the resulting URL. Some codes from dragon shield like PLGS should be plg20.)')
                 exit(1)
 
     def __eq__(self, other):
