@@ -4,3 +4,4 @@ cleaned
 .history
 .vscode
 __pycache__
+tmp.csv
