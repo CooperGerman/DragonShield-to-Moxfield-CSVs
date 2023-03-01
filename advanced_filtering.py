@@ -33,7 +33,9 @@ import colored_traceback.always
 def run(args):
 
     #Create mox folder at the path given, make files easier to find
-    cleanoutputfolder =args.path + '/../cleaned'
+    filtoutputfolder =args.path + '/../results/filt'
+    cleanoutputfolder =args.path + '/../results/db'
+    os.makedirs(filtoutputfolder, exist_ok=True)
     os.makedirs(cleanoutputfolder, exist_ok=True)
 
     fils = glob.glob(args.path+'/*.csv', recursive=True)
@@ -73,6 +75,8 @@ def run(args):
                             card_number=row[6],
                             condition=row[7],
                             language=row[9],
+                            # date format yyyy-mm-dd
+                            bdate=row[11],
                             promo=('s' in row[6] or 'p' in row[6]),
                             etched=(row[8] == 'Etched'),
                             foil=(row[8] == 'Foil'),
@@ -83,6 +87,7 @@ def run(args):
                         log.debug('Updating the price of as none has been found: '+str(tmp_card))
                         tmp_card.update_price()
                     if not db.find(tmp_card):
+                        # If card was added after the
                         db.add(tmp_card)
                         log.debug('Adding new card to DB: '+str(tmp_card))
                     else :
@@ -111,14 +116,15 @@ def run(args):
                         for fcard in db.get_cards_by_name(c.name):
                             log.debug('Filtering card: '+str(fcard))
                             if fcard.price:
-                                if fcard.price >= args.min_price:
-                                    filt_db.add(fcard)
+                                # if fcard.price >= args.min_price:
+                                #     filt_db.add(fcard)
+                                filt_db.add(fcard)
                             else :
                                 na_db.add(fcard)
                                 log.warning('Card has no price, skipping: '+str(fcard))
 
                 # dump filtered db into json file
-                f = open(cleanoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_filt_db.json', 'w')
+                f = open(filtoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_filt_db.json', 'w')
 
                 # keep only 2 decimals for total value
                 value = int(filt_db.get_value()*100)/100
@@ -142,7 +148,7 @@ def run(args):
 
                 if na_db.cards:
                     # dump non applicable db into json file
-                    f = open(cleanoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_na_db.json', 'w')
+                    f = open(filtoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_na_db.json', 'w')
                     f.write(
                         json.dumps({
                             'Header' : {
@@ -154,9 +160,6 @@ def run(args):
                     # print non applicable summary (nb of non applicable cards)
                     log.critical('Non applicable cards: '+str(len(na_db.cards)))
                     log.critical('  -- Estimated number of token entries: '+str(len(na_db.get_entries_by_type('token'))))
-
-
-
 
         elif 'Card Type' in lines[1]:
             '''

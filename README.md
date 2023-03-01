@@ -11,6 +11,7 @@ To use this tool simply put all your extracted csv files into a directory  and c
 ```bash
 python3 ./DS2MOX_convert.py <path to csv files folder>
 ```
+This will generate folders for each output format (moxfield, manabox) and will put the converted files in them.
 
 ## advanced_filtering.py
 

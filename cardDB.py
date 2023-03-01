@@ -121,7 +121,23 @@ class CardDB(object):
         '''
         return {'cards' : [c.__dict__ for c in self.cards]}
 
+    def to_mox(self):
+        '''
+        convert DB to moxfield format
+        '''
+        res = ['Count,Name,Edition,Condition,Language,Foil,Tag']
+        for c in self.cards:
+            res.append(c.to_mox())
+        return '\n'.join(res)
 
+    def to_manabox(self):
+        '''
+        convert DB to manabox format
+        '''
+        res = ['card name,quantity,set name,set code,foil,card number,language,condition,purchase price,purchase currency']
+        for c in self.cards:
+            res.append(c.to_manabox())
+        return '\n'.join(res)
 
     def dump(self):
         '''
@@ -133,17 +149,8 @@ class CardDB(object):
 class Card(object):
     '''
     Card class to hold card info
-    attributes are:
-        name
-        edition
-        condition
-        language
-        foil
-        count
-        price
-        currency
     '''
-    def __init__(self, name, edition, editionstr, card_number : int, condition, language, promo : bool, etched : bool, foil : bool, count : int, price, currency = 'usd'):
+    def __init__(self, name, edition, editionstr, card_number : int, condition, language, bdate : datetime, bprice, promo : bool, etched : bool, foil : bool, count : int, price, currency = 'usd'):
         '''
         en  | en | English             |
         es  | sp | Spanish             |
@@ -204,6 +211,8 @@ class Card(object):
         self.editionstr = editionstr.lower()
         self.condition = condition
         self.language = lang_lut[language.lower()]
+        self.bdate = bdate
+        self.bprice = bprice
 
         self.foil = foil
         self.promo = promo
@@ -287,8 +296,27 @@ class Card(object):
         '''
         Only matches if all attributes are equal (except count and price)
         '''
+        # return (self.name == other.name and self.edition == other.edition and self.language == other.language and self.bdate == other.bdate and self.foil == other.foil)
         return (self.name == other.name and self.edition == other.edition and self.language == other.language and self.foil == other.foil)
 
+    def __dict__(self):
+        return {'name': self.name, 'edition': self.edition, 'condition': self.condition, 'language': self.language, 'foil': self.foil, 'promo': self.promo, 'etched': self.etched, 'count': self.count, 'price': self.price, 'currency': self.currency, 'alt_prc': self.alt_prc}
+
+    def to_mox(self):
+        cond_lut = {
+                    'Mint'         : "M",
+                    'NearMint'     : "NM",
+                    'Excellent'    : "NM",
+                    'Good'         : 'LP',
+                    'Played'       : 'MP',
+                    'LightPlayed'  : 'LP'
+                    }
+        # Count, Name, Edition, Condition, Language, Foil, <Tag>
+        return (',').join([str(self.count), '"'+self.name+'"', self.edition.upper(), cond_lut[self.condition], self.language, 'foil' if self.foil else '""', '""'])
+
+    def to_manabox(self):
+        # card name,quantity,set name,set code,foil,card number,language,condition,purchase price,purchase currency
+        return (',').join(['"'+self.name+'"', str(self.count), '"'+self.editionstr+'"', self.edition, 'foil' if self.foil else '', self.card_number, self.language, self.condition, str(self.price if self.price else 0.0), self.currency])
     def __repr__(self):
         return self.name + ' ' + self.edition + ' ' + self.condition + ' ' + self.language + ' ' + str(self.foil) + ' ' + str(self.count) + ' ' + str(self.price)
 
