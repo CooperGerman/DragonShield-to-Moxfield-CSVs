@@ -130,6 +130,15 @@ class CardDB(object):
             res.append(c.to_mox())
         return '\n'.join(res)
 
+    def to_archidekt(self):
+        '''
+        convert DB to archidekt format
+        '''
+        res = ['Count,Name,Edition,Condition,Language,Foil,Card number']
+        for c in self.cards:
+            res.append(c.to_archidekt())
+        return '\n'.join(res)
+
     def to_manabox(self):
         '''
         convert DB to manabox format
@@ -313,6 +322,18 @@ class Card(object):
                     }
         # Count, Name, Edition, Condition, Language, Foil, <Tag>
         return (',').join([str(self.count), '"'+self.name+'"', self.edition.upper(), cond_lut[self.condition], self.language, 'foil' if self.foil else '""', '""'])
+
+    def to_archidekt(self):
+        cond_lut = {
+                    'Mint'         : "M",
+                    'NearMint'     : "NM",
+                    'Excellent'    : "NM",
+                    'Good'         : 'LP',
+                    'Played'       : 'MP',
+                    'LightPlayed'  : 'LP'
+                    }
+        # Count, Name, Edition, Condition, Language, Foil, <Tag>
+        return (',').join([str(self.count), '"'+self.name+'"', self.edition.upper(), cond_lut[self.condition], self.language, 'foil' if self.foil else '""', self.card_number])
 
     def to_manabox(self):
         # card name,quantity,set name,set code,foil,card number,language,condition,purchase price,purchase currency

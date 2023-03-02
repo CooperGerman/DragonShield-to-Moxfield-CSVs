@@ -24,8 +24,10 @@ def run(args):
 
     #Create mox folder at the path given, make files easier to find
     moxoutputfolder =args.path + '/../results/mox'
+    archoutputfolder =args.path + '/../results/archidekt'
     manaboxoutputfolder =args.path + '/../results/manabox'
     os.makedirs(moxoutputfolder, exist_ok=True)
+    os.makedirs(archoutputfolder, exist_ok=True)
     os.makedirs(manaboxoutputfolder, exist_ok=True)
 
     fils = glob.glob(args.path+'/*.csv', recursive=True)
@@ -90,10 +92,13 @@ def run(args):
                         )
                     db.add(tmp_card)
             fmox = open(moxoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_mox.csv', 'w')
+            farch = open(archoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_archidekt.csv', 'w')
             fmanabox = open(manaboxoutputfolder + "/" + (os.path.splitext(os.path.basename(fil))[0])+'_manabox.csv', 'w')
             fmox.write(db.to_mox())
+            farch.write(db.to_archidekt())
             fmanabox.write(db.to_manabox())
             fmox.close()
+            farch.close()
             fmanabox.close()
 
         elif 'Card Type' in lines[1]:
