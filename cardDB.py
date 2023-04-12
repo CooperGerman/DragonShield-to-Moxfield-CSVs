@@ -134,7 +134,8 @@ class CardDB(object):
         '''
         convert DB to archidekt format
         '''
-        res = ['Count,Name,Edition,Condition,Language,Foil,Card number']
+        # Quantity, Name, Set Name, Set Code, Foil/Variant, Condition, language
+        res = ['Count,Name,Edition,Set Code,Foil,Condition,Language,Card number']
         for c in self.cards:
             res.append(c.to_archidekt())
         return '\n'.join(res)
@@ -318,7 +319,8 @@ class Card(object):
                     'Excellent'    : "NM",
                     'Good'         : 'LP',
                     'Played'       : 'MP',
-                    'LightPlayed'  : 'LP'
+                    'LightPlayed'  : 'LP',
+                    'Poor'         : 'HP'
                     }
         # Count, Name, Edition, Condition, Language, Foil, <Tag>
         return (',').join([str(self.count), '"'+self.name+'"', self.edition.upper(), cond_lut[self.condition], self.language, 'foil' if self.foil else '""', '""'])
@@ -330,10 +332,11 @@ class Card(object):
                     'Excellent'    : "NM",
                     'Good'         : 'LP',
                     'Played'       : 'MP',
-                    'LightPlayed'  : 'LP'
+                    'LightPlayed'  : 'LP',
+                    'Poor'         : 'HP'
                     }
-        # Count, Name, Edition, Condition, Language, Foil, <Tag>
-        return (',').join([str(self.count), '"'+self.name+'"', self.edition.upper(), cond_lut[self.condition], self.language, 'foil' if self.foil else '""', self.card_number])
+        # Quantity, Name, Set Name, Set Code, Foil/Variant, Condition, language, card number
+        return (',').join([str(self.count), '"'+self.name+'"', '"'+self.editionstr+'"', self.edition, 'foil' if self.foil else '', cond_lut[self.condition], self.language if self.language else '""', self.card_number if self.card_number else '""'])
 
     def to_manabox(self):
         # card name,quantity,set name,set code,foil,card number,language,condition,purchase price,purchase currency
