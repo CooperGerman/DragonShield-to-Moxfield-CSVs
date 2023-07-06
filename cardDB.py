@@ -119,7 +119,7 @@ class CardDB(object):
         '''
         convert DB to dict with each element being a dict
         '''
-        return {'cards' : [c.__dict__ for c in self.cards]}
+        return {'cards' : [c.__dict__() for c in self.cards]}
 
     def to_mox(self):
         '''
@@ -153,7 +153,7 @@ class CardDB(object):
         '''
         Dump DB to JSON
         '''
-        return json.dumps(self.cards, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return json.dumps(self.cards, default=lambda o: o.__dict__(), sort_keys=True, indent=4)
 
 
 class Card(object):
@@ -237,7 +237,7 @@ class Card(object):
         '''
         Get value of card
         '''
-        return self.price * self.count
+        return self.price * self.count if self.price else 0.0
 
     def update_price(self, currency = 'usd'):
         '''
