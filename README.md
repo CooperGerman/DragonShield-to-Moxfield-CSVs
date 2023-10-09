@@ -1,6 +1,6 @@
 # What am I ?
 
-This repo contains some simple scripts :
+This repo contains some scripts the can be used in order to automate a Dragonshield collection export and upload the converted collection to Archidekt.
 - `convert.py` aims at reformatting DragonSHield exported CSV files into Moxfield acceptable ones.
 - `advanced_filtering.py` is a more advanced script that can filter the cards based on a list of cards you want to sell. This script uses minimum and maximum prices as well as the minimum number of instances for each card to determine if it should be included in the output.
 

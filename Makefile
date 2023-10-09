@@ -28,7 +28,7 @@ DRAGON_PASSWD = $(shell $(call fetch,./config/config.json,dragonshield_password)
 ARCH_PASSWD = $(shell $(call fetch,./config/config.json,archidekt_password))
 ARCH_USER = $(shell $(call fetch,./config/config.json,archidekt_username))
 
-DLFOLDER = $(shell $(call fetch,./config/config.json,dragonshield_download_folder))
+DLFOLDER = $(shell $(call fetch,./config/config.json,download_folder))
 
 all: clean export_ds convert import
 
