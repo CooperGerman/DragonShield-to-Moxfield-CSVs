@@ -132,12 +132,12 @@ def run(args):
 
 
 def main():
-	banner = '''This program is responsible for converting Dragonshield like csv files to readable Moxfield ones.'''
+	banner = '''This program is responsible for converting Dragonshield like csv files to readable csv files for third party sites.'''
 	parser = argparse.ArgumentParser(
 		formatter_class=argparse.RawTextHelpFormatter,
-		prog='DS2MOX_convert',
+		prog='DSConvert',
 		description=banner,
-		epilog='Convert Dragon shield to Moxfield.'
+		epilog='Convert Dragon shield to many third party compatible csv files.'
 	)
 	parser.add_argument(
 		'path',
