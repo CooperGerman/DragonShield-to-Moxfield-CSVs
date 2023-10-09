@@ -100,7 +100,7 @@ def run(args):
 
    # click file import C:\Users\UBOE-yannicklp\Downloads\all-folders.csv
    time.sleep(1)
-   file_path = os.path.join("C:\\", "Users", "UBOE-yannicklp", "Downloads", "all-folders_archidekt.csv")
+   file_path = os.path.join(args.input)
    input = driver.find_element(by=By.CSS_SELECTOR, value=".style__StyledDropzone-sc-1ksfv9p-1 > input:nth-child(2)")
    input.send_keys(file_path)
 
@@ -112,6 +112,7 @@ def run(args):
 
 def main():
    parser = argparse.ArgumentParser(description='Logs into the archidekt website to upload the csv files containing the entire collection of a user previously formatted with DSConvert.py.')
+   parser.add_argument('file', type=str, help='Input csv file', required=True)
    parser.add_argument('-u', '--username', type=str, help='Username of the Dragonshield account', required=True)
    parser.add_argument('-p', '--password', type=str, help='Password of the Dragonshield account', required=True)
    parser.add_argument('-a', '--attempts', type=int, help='Number of attempts', required=False, default=3)

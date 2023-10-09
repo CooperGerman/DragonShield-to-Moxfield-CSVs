@@ -7,3 +7,4 @@ cleaned
 __pycache__
 tmp.csv
 results
+config/config.json
