@@ -61,7 +61,7 @@ def run(args):
 					folder = row[0]
 					quantity = row[1]
 					trade_quantity = row[2]
-					card_name = row[3]
+					card_name = row[3].replace('"', '\"')
 					set_code = row[4]
 					set_name = row[5]
 					card_number = row[6]
