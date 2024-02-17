@@ -36,18 +36,20 @@ venv:
 	echo "Setting up environment" ; \
 	mkdir -p .venv ; \
 	python3 -m venv .venv ; \
-	source .venv/bin/activate ; \
-	echo "Installing python dependencies" ; \
-	pip install -r requirements.txt ; \
-	pip install --upgrade pip ; \
+	echo"Installing python dependencies" ; \
+	pip install -r requirements.txt --break-system-packages; \
+	pip install --upgrade pip --break-system-packages; \
 	echo "Done initializing virtual environment"
+
+get_requirements:
+	.venv/bin/python --force --savepath requirements.txt ./tools ; \
+	deactivate
 
 install: venv
 
 export_ds:
 	@echo "Exporting DragonShield collection to CSVs"
-	source .venv/bin/activate ; \
-	python tools/dragonshield_scrapper.py \
+	.venv/bin/python tools/dragonshield_scrapper.py \
 		-u=$(DRAGON_USER) \
 		-p=$(DRAGON_PASSWD) \
 		-a=$(ATTEMPTS)
@@ -57,14 +59,12 @@ input:
 	mkdir -p input
 	cp $(DLFOLDER)/all-folder*.csv input/
 	@echo "Converting CSVs to Moxfield format"
-	source .venv/bin/activate ; \
-	python tools/DSConvert.py \
+	.venv/bin/python tools/DSConvert.py \
 		./input
 
 import:
 	@echo "Importing CSVs to Archidekt"
-	source .venv/bin/activate ; \
-	python tools/archidekt_uploader.py \
+	.venv/bin/python tools/archidekt_uploader.py \
 		./results/archidekt/ \
 		-u=$(ARCH_USER) \
 		-p=$(ARCH_PASSWD) \
