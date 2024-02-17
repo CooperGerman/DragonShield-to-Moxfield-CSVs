@@ -32,8 +32,21 @@ DLFOLDER = $(shell $(call fetch,./config/config.json,download_folder))
 
 all: clean export_ds convert import
 
+venv:
+	echo "Setting up environment" ; \
+	mkdir -p .venv ; \
+	python3 -m venv .venv ; \
+	source .venv/bin/activate ; \
+	echo "Installing python dependencies" ; \
+	pip install -r requirements.txt ; \
+	pip install --upgrade pip ; \
+	echo "Done initializing virtual environment"
+
+install: venv
+
 export_ds:
 	@echo "Exporting DragonShield collection to CSVs"
+	source .venv/bin/activate ; \
 	python tools/dragonshield_scrapper.py \
 		-u=$(DRAGON_USER) \
 		-p=$(DRAGON_PASSWD) \
@@ -44,11 +57,13 @@ input:
 	mkdir -p input
 	cp $(DLFOLDER)/all-folder*.csv input/
 	@echo "Converting CSVs to Moxfield format"
+	source .venv/bin/activate ; \
 	python tools/DSConvert.py \
 		./input
 
 import:
 	@echo "Importing CSVs to Archidekt"
+	source .venv/bin/activate ; \
 	python tools/archidekt_uploader.py \
 		./results/archidekt/ \
 		-u=$(ARCH_USER) \
