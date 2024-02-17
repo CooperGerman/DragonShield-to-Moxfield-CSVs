@@ -1,3 +1,8 @@
+# Important Note
+This project is not this crucial anymore as Archidekt (the main reason for this project) now has a DragonShield csv type import functionality. It could still be useful for other purposes though like advanced filtering but other tools seems to catch up with time. Automated export import can still be useful for some people but it is not the main focus of this project anymore. Please feel free to add functionalities especially concerning automation purposes.
+
+- https://www.archidekt.com/collections/import
+
 # What am I ?
 
 This repo contains some scripts the can be used in order to automate a Dragonshield collection export and upload the converted collection to Archidekt.
