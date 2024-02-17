@@ -4,6 +4,7 @@ mox
 cleaned
 .history
 .vscode
+.venv
 __pycache__
 tmp.csv
 results
