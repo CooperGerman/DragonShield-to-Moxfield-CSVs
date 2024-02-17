@@ -45,14 +45,14 @@ def run(args):
 
 	login = driver.find_element(by="xpath", value="/html/body/div[1]/main/div/div/form/fieldset/div/div[4]/button")
 	login.click()
-	time.sleep(5)
+	time.sleep(5+5)
 	# Go to the collection page
 	driver.get("https://mtg.dragonshield.com/folders")
-	time.sleep(10)
+	time.sleep(10+5)
    #export xpath /html/body/app-root/div/master-layout/div/div/div[2]/div/folders/div[1]/div/div[3]/div/div[2]/div[2]/i
 	download = driver.find_element(by="xpath", value="/html/body/app-root/div/master-layout/div/div/div[2]/div/folders/div[1]/div/div[3]/div/div[2]/div[2]/i")
 	download.click()
-	time.sleep(10)
+	time.sleep(10+5)
 
 	# Close the driver
 	driver.close()
@@ -71,7 +71,7 @@ def main():
       except Exception as e:
          print("Attempt {} failed with error: {}".format(attempts, e))
          attempts += 1
-         time.sleep(2)
+         time.sleep(2+5)
    raise Exception("Failed to run after {} attempts".format(args.attempts))
 
 if __name__ == '__main__':

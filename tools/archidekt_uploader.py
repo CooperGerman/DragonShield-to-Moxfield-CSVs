@@ -40,7 +40,7 @@ def run(args, driver):
    time.sleep(2)
    logger.info("Accepting cookies")
    driver.find_element(by=By.CSS_SELECTOR , value="div.sc-qRumB:nth-child(2)").click()
-   time.sleep(3)
+   time.sleep(5)
    # Log in
    logger.info("Logging in")
    username = driver.find_element(by=By.NAME, value="username")
@@ -51,22 +51,22 @@ def run(args, driver):
    # submit button
    logger.info("Submitting")
    driver.find_element(by=By.CSS_SELECTOR, value="button.ui").click()
-   time.sleep(3)
+   time.sleep(5)
 
    # Go to the collection page
    logger.info("Goto collection")
    driver.find_element(by=By.CSS_SELECTOR, value="a.globalToolbar_forumsAndCollection__C__GP").click()
-   time.sleep(3)
+   time.sleep(5)
 
    # click on Paper
    logger.info("Select Paper collection")
    driver.find_element(by=By.CSS_SELECTOR, value="div.style__GameButton-sc-1etwy9d-0:nth-child(1)").click()
-   time.sleep(3)
+   time.sleep(5)
 
    # click on Settings
    logger.info("Click on settings")
    driver.find_element(by=By.CSS_SELECTOR, value="div.bannerControls_groups__VZcim:nth-child(2) > span:nth-child(2) > button:nth-child(1)").click()
-   time.sleep(3)
+   time.sleep(5)
 
    # click on DELETE
    logger.info("Write Delete my collection")
@@ -75,7 +75,7 @@ def run(args, driver):
    # click on Back
    logger.info("Go back")
    driver.find_element(by=By.CSS_SELECTOR, value=".overlay_backButton__6gCuA > i:nth-child(1)").click()
-   time.sleep(3)
+   time.sleep(5)
 
    # click on import_btn
    logger.info("Click on import")
