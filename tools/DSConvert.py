@@ -56,7 +56,8 @@ def run(args):
 
 			with open('./tmp.csv', newline='') as csvfile:
 				spamreader = csv.reader(csvfile, delimiter=',')
-				for row in spamreader:
+				for i, row in enumerate(spamreader):
+					print('Processing row '+str(i))
 					# Split all elements in the row into local variables
 					folder = row[0]
 					quantity = row[1]
