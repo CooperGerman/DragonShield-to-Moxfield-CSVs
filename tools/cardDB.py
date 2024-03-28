@@ -231,8 +231,64 @@ class Card(object):
         self.price = price
         self.currency = currency
         self.alt_prc = False
+        self.get_scry_name()
         # if self.promo:
         #     self.edition = self.edition[1:]
+
+    def get_scry_name(self):
+        '''
+        Get scryfall name by removing special characters
+        '''
+        # connect to srryfall API and get card name
+        import requests
+        # search using this api /cards/:code/:number(/:lang)
+        url = 'https://api.scryfall.com/cards/'+self.edition+'/'+self.card_number+'/'+self.language
+        log.debug(url)
+        # compare last TIME and now and verify at least 100ms have passed
+        # if not, sleep for 100ms
+        # this is to avoid hitting the rate limit of 10 requests per second
+        # https://scryfall.com/docs/api
+        global TIME
+        if (datetime.datetime.now() - TIME).total_seconds() < 0.1:
+            time.sleep(0.1)
+        TIME = datetime.datetime.now()
+        r = requests.get(url)
+
+        if r.status_code == 200:
+            # check if we got a match
+            if r.json()['object'] == 'error':
+                log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
+                exit(1)
+            self.name = r.json()['name']
+        else:
+            # search using this api /cards/:code/:number
+            log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil) + ' trying without language')
+            url = 'https://api.scryfall.com/cards/'+self.edition+'/'+self.card_number
+            log.debug(url)
+            # compare last TIME and now and verify at least 100ms have passed
+            # if not, sleep for 100ms
+            # this is to avoid hitting the rate limit of 10 requests per second
+            # https://scryfall.com/docs/api
+            if (datetime.datetime.now() - TIME).total_seconds() < 0.1:
+                time.sleep(0.1)
+            TIME = datetime.datetime.now()
+            r = requests.get(url)
+
+            if r.status_code == 200:
+                # check if we got a match
+                if r.json()['object'] == 'error':
+                    log.warning('No card found for: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
+                    exit(1)
+                self.name = r.json()['name']
+            else :
+                log.critical('Error getting name for card: ' + self.name + ' ' + self.edition + ' ' + self.language + ' ' + str(self.foil))
+                log.critical('Please check if the card is available on scryfall.com')
+                log.critical('Search for "'+self.name+'" on : https://scryfall.com/')
+                log.critical('-- Language might not be available for this card or edition mistake might have been made')
+                log.critical('-- Set code might be wrong (correct convention are to be deducted from scryfall.com. Search your card and look at the resulting URL. Some codes contain ★ DragonSHield might export XXXetc card codes that do not seem supported.)')
+                log.critical('-- Edition code might be wrong (correct convention are to be deducted from scryfall.com. Search your card and look at the resulting URL. Some codes from dragon shield like PLGS should be plg20.)')
+
+
     def get_value(self):
         '''
         Get value of card
