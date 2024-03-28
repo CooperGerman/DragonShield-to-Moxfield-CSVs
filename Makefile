@@ -59,6 +59,9 @@ input:
 	mkdir -p input
 	cp $(DLFOLDER)/all-folder*.csv input/
 	@echo "Converting CSVs to Moxfield format"
+	$(MAKE) DSConvert
+
+DSConvert:
 	.venv/bin/python tools/DSConvert.py \
 		./input
 
